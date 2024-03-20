@@ -17,7 +17,7 @@ export default defineConfig({
     proxy:{
       '/api':{//獲取路徑中包含了/api的請求
           target:'http://localhost:8080',//後端服務所在的地址
-          changeOrigin:true,//修改源
+          changeOrigin:true,//修改地址
           rewrite:(path)=>path.replace(/^\/api/,'')///api替換為''
       }
     }
