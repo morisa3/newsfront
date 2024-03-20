@@ -8,9 +8,10 @@ const useUserInfoStore = defineStore('userInfo', () => {
     const info = ref({})
     
     //定義函數，修改訊息
-    const setInfo = () => {
+    const setInfo = (newInfo) => {
         info.value = newInfo
     }
+    
     //定義函數，移除訊息
     const removeInfo = () => {
         info.value = {}

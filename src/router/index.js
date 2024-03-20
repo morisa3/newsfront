@@ -10,17 +10,17 @@ import UserAvatarVue from '@/views/user/UserAvatar.vue'
 import UserInfoVue from '@/views/user/UserInfo.vue'
 import UserResetPasswordVue from '@/views/user/UserResetPassword.vue'
 
-
 //定義路由器關係
 const routes = [
     { path: '/login', component: LoginVue },
     {
-        path: '/', component: LayoutVue, redirect: '/article/manage', children: [
+        path: '/', component: LayoutVue, redirect: '/article/manage', 
+        children: [
             { path: '/article/category', component: ArticleCategoryVue },
             { path: '/article/manage', component: ArticleManageVue },
-            { path: '/user/avatar', component: UserAvatarVue },
             { path: '/user/info', component: UserInfoVue },
-            { path: '/user/resetPassword', component: UserResetPasswordVue },
+            { path: '/user/avatar', component: UserAvatarVue },
+            { path: '/user/resetPassword', component: UserResetPasswordVue }
         ]
     }
 ]

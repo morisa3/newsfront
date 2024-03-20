@@ -12,20 +12,8 @@ import {
 import avatar from '@/assets/default.png'
 
 //調用函數，獲取用戶信息
-import { userInfoService } from '@/api/user.js'
-import useUserInfoStore from '@/stores/userInfo.js'
 import { useTokenStore } from '@/stores/token.js'
-const userInfoStore = useUserInfoStore()
 const tokenStore = useTokenStore()
-//調用函數，獲取用戶信息
-const getUserInfo = async () => {
-    //調用端口
-    let result = await userInfoService()
-    //將數據儲存到pinia中
-    userInfoStore.setInfo(result.data)
-}
-//調用獲取用戶訊息的函數
-getUserInfo()
 
 //條目被點擊後，調用的函數
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -122,12 +110,12 @@ const handleCommand = (command) => {
         <el-container>
             <!-- 頭部區域 -->
             <el-header>
-                <div>登入用戶名稱：<strong>{{ userInfoStore.info.nickname }}</strong></div>
+                <div>登入用戶名稱：</div>
                 <!-- 下拉菜單 -->
                 <!-- command: 條目被點擊後會觸發，在事件函數上可以聲明一個參數，接收條目對應的指令-->
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
-                        <el-avatar :src="userInfoStore.info.userPic ? userInfoStore.info.userPic : avatar" />
+                        <el-avatar />
                         <el-icon>
                             <CaretBottom />
                         </el-icon>
