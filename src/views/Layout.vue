@@ -12,13 +12,25 @@ import {
 import avatar from '@/assets/default.png'
 
 //調用函數，獲取用戶信息
+import {userInfoService} from '@/api/user.js'
 import { useTokenStore } from '@/stores/token.js'
+import useUserInfoStore from '@/stores/userInfo.js'
 const tokenStore = useTokenStore()
+const userInfoStore = useUserInfoStore()
 
+//調用函數,獲取使用者詳細資訊
+const getUserInfo = async()=>{
+    //調用端口
+    let result = await userInfoService();
+    //資料存儲到pinia中
+    userInfoStore.setInfo(result.data);
+}
+
+getUserInfo();
 //條目被點擊後，調用的函數
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 const router = useRouter()
+import { ElMessage, ElMessageBox } from 'element-plus'
 const handleCommand = (command) => {
     //判斷指令
     if (command === 'logout') {

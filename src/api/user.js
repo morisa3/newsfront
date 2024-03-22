@@ -20,6 +20,12 @@ export const userLoginService = (loginData) => {
     return request.post('/user/login', params)
 }
 
+//獲取使用者詳細資訊
+export const userInfoService = ()=>{
+    return request.get('/user/userInfo')
+}
+
+
 //修改用戶信息
 export const userInfoUpdateService = (userInfoData) => {
     return request.put('/user/update',userInfoData)

@@ -110,7 +110,7 @@ const deleteCategory = (row) => {
     )
         .then(async () => {
             //調用端口
-            let result = await awaitarticleCategoryDeleteService(row.id)
+            let result = await articleCategoryDeleteService(row.id)
             ElMessage({
                 type: 'success',
                 message: '刪除成功',

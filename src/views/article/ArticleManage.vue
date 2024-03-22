@@ -73,8 +73,8 @@ const articles = ref([
 
 //分頁條資料模型
 const pageNum = ref(1)//當前頁
-const total = ref(20)//總條數
 const pageSize = ref(3)//每頁條數
+const total = ref(20)//總條數
 
 //當每頁條數發生了變化，調用此函數
 const onSizeChange = (size) => {
@@ -88,7 +88,7 @@ const onCurrentChange = (num) => {
 }
 
 //聲明異步函數
-import { articleCategoryListService, articleListService, articleAddService } from '@/api/article.js'
+import { articleCategoryListService, articleListService, articleAddService, articleUpdateService, articleDeleteService} from '@/api/article.js'
 //獲取文章分類列表數據
 const articleCategoryList = async () => {
     let result = await articleCategoryListService()
@@ -104,8 +104,8 @@ const articleList = async () => {
         state: state.value ? state.value : null
     }
     let result = await articleListService(params)
-
     //渲染到視圖上
+    //total items為對應的後端數據，命名須要一致
     total.value = result.data.total
     articles.value = result.data.items
 
@@ -119,10 +119,12 @@ const articleList = async () => {
         }
     }
 }
-//調用獲取所有文章分類的函數
-articleCategoryList()
+
 //調用獲取所有文章列表的函數
 articleList()
+//調用獲取所有文章分類的函數
+articleCategoryList()
+
 
 import { Plus } from '@element-plus/icons-vue'
 import { QuillEditor } from '@vueup/vue-quill'
@@ -145,11 +147,11 @@ const tokenStore = useTokenStore()
 //上傳成功的回調函數
 const uploadSuccess = (result) => {
     articleModel.value.coverImg = result.data
-    console.log(result.data)
+    //console.log(result.data)
 }
 
 //添加文章
-import { ElMessage } from 'element-plus'
+import { ElMessage,ElMessageBox } from 'element-plus'
 const addArticle = async (clickState) => {
     //把發佈狀態賦值給數據模型
     articleModel.value.state = clickState
@@ -164,6 +166,80 @@ const addArticle = async (clickState) => {
     articleList()
 }
 
+//定義標籤標題變量
+const title = ref('')
+
+//展示編輯彈窗
+const showDrawer = (row) => {
+    //顯示抽屜
+    visibleDrawer.value = true 
+    title.value = '編輯文章'
+    //複製數據
+    articleModel.value.title = row.title
+    articleModel.value.categoryId = row.categoryId
+    articleModel.value.coverImg = row.coverImg
+    articleModel.value.content = row.content
+    articleModel.value.state = row.state
+    //擴展id屬性，需傳遞給後端以便完成修改
+    articleModel.value.id = row.id
+    
+}
+
+//修改文章
+const updateArticle = async (clickState) =>{
+    //把發佈狀態賦值給數據模型
+    articleModel.value.state = clickState
+    //調用端口
+    let result = await articleUpdateService(articleModel.value)
+
+    ElMessage.success(result.msg ? result.msg : '修改成功')
+
+    //調用獲取所有文章列表的函數
+    articleList()
+
+    //讓抽屜消失
+    visibleDrawer.value = false
+}
+
+//清空模型數據
+const clearArticeData = () => {
+    articleModel.value.title = ''
+    articleModel.value.categoryId = ''
+    articleModel.value.coverImg = ''
+    articleModel.value.content = ''
+    articleModel.value.state = ''
+
+}
+//刪除文章
+const deleteArticle = async (row) =>{
+    //提示用戶，確認框
+    ElMessageBox.confirm(
+        '你確定要刪除該分類嗎?',
+        '溫馨提示',
+        {
+            confirmButtonText: '確認',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(async () => {
+            //調用端口
+            let result = await articleDeleteService(row.id)
+            ElMessage({
+                type: 'success',
+                message: '刪除成功',
+            })
+            //調用獲取所有文章分類的函數
+            articleList()
+        })
+        .catch(() => {
+            ElMessage({
+                type: 'info',
+                message: '刪除取消',
+            })
+        })
+}
+
 </script>
 <template>
     <el-card class="page-container">
@@ -171,22 +247,22 @@ const addArticle = async (clickState) => {
             <div class="header">
                 <span>文章管理</span>
                 <div class="extra">
-                    <el-button type="primary" @click="visibleDrawer = true">添加文章</el-button>
+                    <el-button type="primary" @click="visibleDrawer = true; title='添加文章'; clearArticeData()">添加文章</el-button>
                 </div>
             </div>
         </template>
         <!-- 搜索表單 -->
         <el-form inline>
-            <el-form-item label="文章分類：">
+            <el-form-item label="文章分類：" style="width: 20%">
                 <el-select placeholder="請選擇" v-model="categoryId">
                     <el-option v-for="c in categorys" :key="c.id" :label="c.categoryName" :value="c.id">
                     </el-option>
                 </el-select>
             </el-form-item>
 
-            <el-form-item label="發佈狀態：">
+            <el-form-item label="發佈狀態：" style="width: 20%">
                 <el-select placeholder="請選擇" v-model="state">
-                    <el-option label="已發佈" value="已發佈"></el-option>
+                    <el-option label="已發佈" value="已發佈" ></el-option>
                     <el-option label="草稿" value="草稿"></el-option>
                 </el-select>
             </el-form-item>
@@ -203,8 +279,8 @@ const addArticle = async (clickState) => {
             <el-table-column label="狀態" prop="state"></el-table-column>
             <el-table-column label="操作" width="100">
                 <template #default="{ row }">
-                    <el-button :icon="Edit" circle plain type="primary"></el-button>
-                    <el-button :icon="Delete" circle plain type="danger"></el-button>
+                    <el-button :icon="Edit" circle plain type="primary" @click="showDrawer(row)"></el-button>
+                    <el-button :icon="Delete" circle plain type="danger" @click="deleteArticle(row)"></el-button>
                 </template>
             </el-table-column>
             <template #empty>
@@ -217,7 +293,7 @@ const addArticle = async (clickState) => {
             @current-change="onCurrentChange" style="margin-top: 20px; justify-content: flex-end" />
 
         <!-- 抽屜 -->
-        <el-drawer v-model="visibleDrawer" title="添加文章" direction="rtl" size="50%">
+        <el-drawer v-model="visibleDrawer" title ='添加文章' direction="rtl" size="50%">
             <!-- 添加文章表單 -->
             <el-form :model="articleModel" label-width="100px">
                 <el-form-item label="文章標題">
@@ -234,11 +310,15 @@ const addArticle = async (clickState) => {
                     :auto-upload=設置是否自動上傳 
                     action=設置端口路徑 
                     name=上傳的文件字段名 
-                    :header={'Authorization':token}設置上傳的請求頭
+                    :headers={'Authorization':token}設置上傳的請求頭
                     :on-success=設置上傳成功的回調函數
                     -->
-                    <el-upload class="avatar-uploader" :auto-upload="true" :show-file-list="false" action="/api/upload"
-                        name="file" :header="{ 'Authorization': tokenStore.token }" :on-success="uploadSuccess">
+                    <el-upload class="avatar-uploader" :auto-upload="true" :show-file-list="false" 
+                    action="/api/upload"
+                    name="file" 
+                    :headers="{ 'Authorization': tokenStore.token }" 
+                    :on-success="uploadSuccess"
+                    >
                         <img v-if="articleModel.coverImg" :src="articleModel.coverImg" class="avatar" />
                         <el-icon v-else class="avatar-uploader-icon">
                             <Plus />
@@ -252,8 +332,8 @@ const addArticle = async (clickState) => {
                     </div>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="addArticle('已發佈')">發佈</el-button>
-                    <el-button type="info" @click="addArticle('草稿')">草稿</el-button>
+                    <el-button type="primary" @click="title == '添加文章' ? addArticle('已發佈') : updateArticle('已發佈')">發佈</el-button>
+                    <el-button type="info" @click="title == '添加文章' ? addArticle('草稿') : updateArticle('草稿')">草稿</el-button>
                 </el-form-item>
             </el-form>
         </el-drawer>
