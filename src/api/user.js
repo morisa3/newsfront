@@ -32,8 +32,7 @@ export const userInfoUpdateService = (userInfoData) => {
 }
 
 //修改用戶頭像
-export const userInfoUpdateAvatarService = (avatarUrl) => {
-    //傳遞url參數
+export const userAvatarUpdateService = (avatarUrl)=>{
     const params = new URLSearchParams()
     params.append('avatarUrl',avatarUrl)
     return request.patch('/user/updateAvatar',params)

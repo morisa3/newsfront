@@ -122,12 +122,12 @@ const handleCommand = (command) => {
         <el-container>
             <!-- 頭部區域 -->
             <el-header>
-                <div>登入用戶名稱：</div>
+                <div>登入用戶暱稱：<strong>{{ userInfoStore.info.nickname }}</strong></div>
                 <!-- 下拉菜單 -->
                 <!-- command: 條目被點擊後會觸發，在事件函數上可以聲明一個參數，接收條目對應的指令-->
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
-                        <el-avatar />
+                        <el-avatar :src="userInfoStore.info.userPic ? userInfoStore.info.userPic:avatar" />
                         <el-icon>
                             <CaretBottom />
                         </el-icon>
